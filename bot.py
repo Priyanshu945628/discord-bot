@@ -63,21 +63,26 @@ async def testjoin(ctx): await on_member_join(ctx.author)
 @bot.command()
 async def testleave(ctx): await on_member_remove(ctx.author)
 
-# ==================== WEB SERVER FOR UPTIMEROBOT ====================
+# ==================== FIXED WEB SERVER FOR UPTIMEROBOT ====================
 class HealthCheckHandler(BaseHTTPRequestHandler):
+    # Yeh UptimeRobot ki GET requests ko handle karega
     def do_GET(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
         self.wfile.write(b"Bot is active and running 24/7!")
 
+    # FIXED: Yeh UptimeRobot ki HEAD requests ko handle karega (Jo error de rahi thi)
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+
 def run_health_server():
-    # Render default port 10000 use karta hai web services ke liye
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
     server.serve_forever()
 
-# Background thread mein web server run karna taaki discord bot block na ho
 threading.Thread(target=run_health_server, daemon=True).start()
 # =====================================================================
 
